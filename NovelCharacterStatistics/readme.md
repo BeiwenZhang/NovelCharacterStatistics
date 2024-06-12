@@ -1,0 +1,1 @@
+老师您好，在src的percentChart中运行主函数即可

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<%
+// 在这里可以编写任意的 Java 代码
+String message = "Hello, world!"; // 定义一个 Java 变量
+int num = 10;
+
+// 条件判断和循环
+if (num > 5) {
+%>
+
+
+
+<h2>角色出场次数统计</h2>
+<svg id="barChart"></svg>
+
+<h2>角色出现位置百分比</h2>
+<div class="percentageBars">
+    <div class="percentageBar" style="background: linear-gradient(to right, green 10%, yellow 80%);"></div>
+    <div class="percentageBar" style="background: linear-gradient(to right, blue 20%, yellow 60%);"></div>
+    <!-- 其他角色的百分比条 -->
+</div>
+
+<h2>角色相关性矩阵</h2>
+<select id="characterSelect"></select>
+<ul id="relationList"></ul>
+
+
+<script>
+    // 1. 出场次数统计
+    const characterCount = new Map([
+        莉拉: 1224
+    尼诺: 533
+    斯特凡诺: 528
+    马尔切洛: 277
+    皮诺奇娅: 267
+    里诺: 217
+    安东尼奥: 175
+    农齐亚: 123
+    多纳托: 31
+    埃莱娜: 16
+
+
+        ["角色1", 20],
+        ["角色2", 15],
+        ["角色3", 30],
+        // 其他角色...
+    ]);
+
+    const w = 400;
+    const h = 500;
+    const barPadding = 5;
+    // const barWidth = svgWidth / characterCount.size;
+
+    var dataset = [1224, 533,528,277,267,217,175,123,31,16];
+
+    //Create SVG element
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+    svg.selectAll("rect")
+        .data(dataset)//d是data
+        .enter()
+        .append("rect")
+        .attr("x", function(d, i) {
+            return i * (w / dataset.length);
+        })
+        .attr("y", function(d) {
+            return h - d/4;
+        })
+        .attr("width", w / dataset.length - barPadding)
+        .attr("height", function(d) {
+            return d/4;
+        })
+        .attr("fill", function(d) {
+            return "rgb(150, 100, " + Math.round(d/3) + ")";
+        });
+
+
+    svg.selectAll("text")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .text(function(d) {
+            return d;
+        })
+        .attr("text-anchor", "middle")
+        .attr("x", function(d, i) {
+            return i * (w / dataset.length) + (w / dataset.length - barPadding) / 2;
+        })//定位+宽度/2
+        .attr("y", function(d) {
+            return h - (d /4) ;//下移14
+        })
+        .attr("font-family", "songti")
+        .attr("font-size", "11px")
+        .attr("fill", "black");
+
+    // 2. 百分比进度条
+    const startPercentage = 10;
+    const endPercentage = 80;
+
+    const percentageBar = d3.select('#percentageBar')
+        .append('div')
+        .style('width', '100%')
+        .style('background-color', '#f2f2f2')
+        .style('padding', '5px');
+
+    percentageBar.append('div')
+        .style('width', startPercentage + '%')
+        .style('background-color', 'green')
+        .style('color', 'white')
+        .text(startPercentage + '%');
+
+    percentageBar.append('div')
+        .style('width', (endPercentage - startPercentage) + '%')
+        .style('background-color', 'yellow')
+        .style('color', 'black')
+        .text((endPercentage - startPercentage) + '%');
+
+    percentageBar.append('div')
+        .style('width', (100 - endPercentage) + '%')
+        .style('background-color', 'red')
+        .style('color', 'white')
+        .text((100 - endPercentage) + '%');
+
+    // 3. 角色相关性矩阵
+    const relation = [
+        [0.8, 0.5, 0.3, 0.1], // 角色1与其他角色的相关性
+        [0.6, 0.9, 0.4, 0.2], // 角色2与其他角色的相关性
+        [0.4, 0.3, 0.95, 0.6], // 角色3与其他角色的相关性
+        // 其他角色...
+    ];
+
+    const characters = Array.from(characterCount.keys());
+    const select = d3.select('#characterSelect');
+
+    select.selectAll('option')
+        .data(characters)
+        .enter()
+        .append('option')
+        .text((d) => d);
+
+    select.on('change', function() {
+        const selectedIndex = this.selectedIndex;
+        const selectedCharacter = characters[selectedIndex];
+        const relatedCharacters = relation[selectedIndex]
+            .map((value, index) => ({ character: characters[index], value }))
+            .sort((a, b) => b.value - a.value);
+
+        const list = d3.select('#relationList');
+        list.selectAll('li').remove();
+        list.selectAll('li')
+            .data(relatedCharacters)
+            .enter()
+            .append('li')
+            .text((d) => d.character + ': ' + d.value);
+    });
+</script>
+</body>
+</html>
